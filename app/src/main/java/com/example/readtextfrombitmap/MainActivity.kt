@@ -14,29 +14,43 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -48,259 +62,101 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
-import com.example.readtextfrombitmap.ui.theme.ReadTextFromBitmapTheme
 import java.io.File
 import coil.compose.rememberAsyncImagePainter
+import com.example.readtextfrombitmap.Utils.hasCamera
+import com.example.readtextfrombitmap.viewmodel.OcrViewModel
 import com.googlecode.tesseract.android.TessBaseAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.FileOutputStream
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
+import com.example.readtextfrombitmap.screens.Screen
+import com.example.readtextfrombitmap.ui.theme.*
 
 
 class MainActivity : ComponentActivity() {
+    val viewModel:OcrViewModel by viewModels<OcrViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             ReadTextFromBitmapTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Box(modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize()){
-                        Screen()
-                    }
-
-                }
+                MainScreen(viewModel=viewModel)
             }
         }
     }
 }
 
 @Composable
-fun Screen(){
-    val context = LocalContext.current
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-    //var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    val cameraAvailable = hasCamera(context)
-    var bitmapText by remember { mutableStateOf<String?>(null) }
-    var isProcessing by remember { mutableStateOf(false) }
+fun MainScreen(modifier: Modifier = Modifier,viewModel:OcrViewModel){
+    val navItemList = listOf(
+        NavItem("History", History),
+        NavItem("New", Icons.Default.Add),
+        NavItem("Settings", Icons.Default.Settings)
+    )
 
-    val photoUri = remember {
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            File(context.cacheDir, "temp_image.jpg")
-        )
+    var selectedIndex by remember {
+        mutableStateOf(1)
     }
-    LaunchedEffect(imageUri) {
-        imageUri?.let {
-            isProcessing=true
-            withContext(Dispatchers.IO){
-                val bitmap = uriToBitmap(context, it)
-                bitmap?.let{
-                    bitmapText = recognizeText(bitmap!!,context)
-                    isProcessing=false
-                }
-            }
-        }
-    }
-
-    if (isProcessing) {
-        Dialog(onDismissRequest = {}) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White.copy(alpha = 0.5f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-    }
-
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageUri = uri
-    }
-
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success: Boolean ->
-        if (!success) return@rememberLauncherForActivityResult
-        else{
-            imageUri = photoUri
-        }
-    }
-
-    Column(
-        modifier = Modifier.fillMaxSize()
-            .background(color = Color.White)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            Button(onClick = {
-                galleryLauncher.launch("image/*")
-            }) {
-                Text("From Gallery")
-            }
-            Button(onClick = {
-                if(cameraAvailable)
-                    cameraLauncher.launch(photoUri)
-                else
-                    Toast.makeText(context,"The device has not camera",Toast.LENGTH_SHORT).show()
-            }) {
-                Text("From Camera")
-            }
-        }
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .width(1.dp),
-            color = Color.Gray
-        )
-        Box(
-            modifier = Modifier.padding(start = 5.dp, end = 5.dp)
-        ){
-            Column {
-                Text("Selected Image",
-                    modifier = Modifier.fillMaxWidth())
-                var showDialog by remember { mutableStateOf(false) }
-
-                Box(
-                    modifier = Modifier
-                        .height(200.dp)
-                        .fillMaxWidth()
-                        .border(1.dp, MaterialTheme.colorScheme.secondary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (imageUri != null) {
-                        Image(
-                            painter = rememberAsyncImagePainter(imageUri),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clickable { showDialog = true } // tıklayınca büyüt
-                        )
-                    } else {
-                        Text("No Image")
-                    }
-                }
-                if (showDialog) {
-                    Dialog(onDismissRequest = { showDialog = false }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.5f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                painter = rememberAsyncImagePainter(imageUri),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { showDialog = false } // kapatmak için tıkla
-                            )
+    Scaffold(modifier = modifier.fillMaxSize(),
+        bottomBar = {
+            NavigationBar {
+                navItemList.forEachIndexed{index, navItem ->
+                    NavigationBarItem(
+                        selected = selectedIndex == index,
+                        onClick = {
+                            selectedIndex=index
+                        },
+                        icon = {
+                            Icon(imageVector = navItem.icon, contentDescription = navItem.label)
+                        },
+                        label = {
+                            Text(text = navItem.label)
                         }
-                    }
-                }
-                Spacer(modifier = Modifier.padding(5.dp))
-                Text("Text from Image",
-                    modifier = Modifier.fillMaxWidth())
-                Box(
-                    modifier = Modifier
-                        .height(200.dp)
-                        .fillMaxWidth()
-                        .border(1.dp,MaterialTheme.colorScheme.secondary)
-                        .verticalScroll(rememberScrollState()),
-                    contentAlignment = Alignment.Center // hem yatay hem dikey ortala,
-                ) {
-                    bitmapText?.let{
-                        TextField(
-                            value = it,
-                            onValueChange = {},
-                            readOnly = true,
-                            modifier = Modifier.fillMaxWidth(),
-                            textStyle = TextStyle(color = Color.Black),
-                            singleLine = false,
-                            keyboardOptions = KeyboardOptions.Default,
-                            keyboardActions = KeyboardActions.Default,
-                            maxLines = Int.MAX_VALUE
-                        )
-                    }?:run{
-                        Text("No text")
-                    }
-
+                    )
                 }
             }
-        }
+        }) { innerPadding ->
+        ContentScreen(modifier = modifier.padding(innerPadding),selectedIndex,viewModel)
     }
 }
-fun uriToBitmap(context: Context, uri: Uri): Bitmap? {
-    val bitmap = if (Build.VERSION.SDK_INT < 28) {
-        MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-    } else {
-        val source = ImageDecoder.createSource(context.contentResolver, uri)
-        ImageDecoder.decodeBitmap(source)
-    }
-    return bitmap.copy(Bitmap.Config.ARGB_8888, true)
-}
-fun copyAssetIfNeeded(context: Context, resId: Int, outDir: File,outFileName:String) {
-    val outFile = File(outDir, outFileName)
-    if (!outFile.exists()) {
-        outDir.mkdirs()
-        try {
-            context.resources.openRawResource(resId).use { input ->
-                FileOutputStream(outFile).use { output ->
-                    input.copyTo(output)
-                }
-            }
-            println("Dosya başarıyla kopyalandı: ${outFile.absolutePath}")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            println("Dosya kopyalanamadı!")
-        }
-    } else {
-        println("Dosya zaten var: ${outFile.absolutePath}")
+@Composable
+fun ContentScreen(modifier: Modifier = Modifier,selectedIndex:Int,viewModel:OcrViewModel){
+    when(selectedIndex){
+        0->HistoryScreen(modifier)
+        1-> Screen(modifier,viewModel)
+        2-> SettingsScreen(modifier)
     }
 }
-fun recognizeText(bitmap: Bitmap, context: Context): String {
-    try{
-        val tess = TessBaseAPI()
-        val dataPath = context.filesDir.absolutePath + "/tesseract/"
-        val tessDataDir = File(dataPath, "tessdata")
-        println(dataPath)
-        // raw içindeki tur.traineddata dosyasını kopyala
-        copyAssetIfNeeded(context, R.raw.tur, tessDataDir, "tur.traineddata")
-        tess.init(dataPath, "tur")
-        println("Bitmap boyutu: ${bitmap.width}x${bitmap.height}")
-        tess.setImage(bitmap)
-        val extractedText = tess.utF8Text
-        tess.end()
-        return extractedText
-    }catch (e:Exception){
-        println(e.message)
-        return e.message ?: "Hata !"
+@Composable
+fun HistoryScreen(modifier: Modifier = Modifier){
+    Box(modifier =modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center){
+        Text("History Screen")
     }
 }
-fun hasCamera(context: Context): Boolean {
-    return context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
+@Composable
+fun SettingsScreen(modifier: Modifier = Modifier){
+    Box(modifier =modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center){
+        Text("Settings Screen")
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     ReadTextFromBitmapTheme {
-        Screen()
+         HistoryScreen()
     }
 }

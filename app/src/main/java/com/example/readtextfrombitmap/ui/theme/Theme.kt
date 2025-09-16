@@ -9,6 +9,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
@@ -32,7 +33,19 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
+private val LightColors = lightColorScheme(
+    primary = BluePrimary,
+    secondary = BlueSecondary,
+    background = GrayBackground,
+    onBackground = Color.Black
+)
 
+private val DarkColors = darkColorScheme(
+    primary = BluePrimary,
+    secondary = BlueSecondary,
+    background = DarkBackground,
+    onBackground = Color.White
+)
 @Composable
 fun ReadTextFromBitmapTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -50,8 +63,10 @@ fun ReadTextFromBitmapTheme(
         else -> LightColorScheme
     }
 
+    val colors = if (darkTheme) DarkColors else LightColors
+
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colors,
         typography = Typography,
         content = content
     )
