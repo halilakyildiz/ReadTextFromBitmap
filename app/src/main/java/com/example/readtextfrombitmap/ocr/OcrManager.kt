@@ -17,7 +17,7 @@ class OcrManager(private val context: Context) {
             // raw içindeki tur.traineddata dosyasını kopyala
             copyAssetIfNeeded(context, R.raw.tur, tessDataDir, "tur.traineddata")
             tess.init(dataPath, "tur")
-            println("Bitmap boyutu: ${bitmap.width}x${bitmap.height}")
+            //println("Bitmap boyutu: ${bitmap.width}x${bitmap.height}")
             tess.setImage(bitmap)
             val extractedText = tess.utF8Text
             tess.end()
@@ -37,13 +37,13 @@ class OcrManager(private val context: Context) {
                         input.copyTo(output)
                     }
                 }
-                println("Dosya başarıyla kopyalandı: ${outFile.absolutePath}")
+                println("File copied successfully: ${outFile.absolutePath}")
             } catch (e: Exception) {
                 e.printStackTrace()
-                println("Dosya kopyalanamadı!")
+                println("File could not be copied!")
             }
         } else {
-            println("Dosya zaten var: ${outFile.absolutePath}")
+            println("File already exists: ${outFile.absolutePath}")
         }
     }
 }

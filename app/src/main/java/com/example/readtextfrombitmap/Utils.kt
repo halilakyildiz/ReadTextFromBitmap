@@ -21,4 +21,17 @@ object Utils {
     fun hasCamera(context: Context): Boolean {
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
     }
+    fun getCurrentDateTime(): String {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            // Android 8.0 (API 26) ve sonrası
+            val current = java.time.LocalDateTime.now()
+            val formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            current.format(formatter)
+        } else {
+            // Android 7.1 ve öncesi
+            val date = java.util.Date()
+            val formatter = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+            formatter.format(date)
+        }
+    }
 }
