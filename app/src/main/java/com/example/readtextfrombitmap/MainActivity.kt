@@ -99,8 +99,9 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
 import coil.compose.AsyncImage
 import com.example.readtextfrombitmap.model.OcrResults
+import com.example.readtextfrombitmap.screens.HistoryScreen
 import com.example.readtextfrombitmap.screens.LoadingAnimation
-import com.example.readtextfrombitmap.screens.Screen
+import com.example.readtextfrombitmap.screens.OcrScreen
 import com.example.readtextfrombitmap.ui.theme.*
 import java.io.File
 
@@ -161,7 +162,7 @@ fun MainScreen(modifier: Modifier = Modifier,viewModel:OcrViewModel){
 fun ContentScreen(modifier: Modifier = Modifier,selectedIndex:Int,viewModel:OcrViewModel){
     when(selectedIndex){
         0->HistoryScreen(modifier,viewModel)
-        1-> Screen(modifier,viewModel)
+        1-> OcrScreen(modifier,viewModel)
         2-> SettingsScreen(modifier)
     }
 }
@@ -174,92 +175,7 @@ fun SettingsScreen(modifier: Modifier = Modifier){
     }
 }
 
-@Composable
-fun HistoryScreen(modifier: Modifier = Modifier,viewModel:OcrViewModel){
-    val results by viewModel.results.collectAsState()
-    val loading = viewModel.isLoading
 
-    if (loading) {
-        LoadingAnimation()
-    } else {
-        if(results.size>0)
-            LazyVerticalGrid(
-                modifier = modifier.fillMaxSize(),
-                columns = GridCells.Adaptive(minSize = 80.dp),
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ){
-                items(results) { ocr_result ->
-                    OcrResultCard(ocr_result)
-                }
-            }
-        else
-            Box(modifier=modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center){
-                Text("No Data")
-            }
-    }
-}
-@Composable
-fun OcrResultCard(
-    ocrResult:OcrResults
-) {
-    Card(
-        modifier = Modifier
-            .size(width = 80.dp,height = 120.dp),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background  // Light/Dark otomatik
-        )
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (ocrResult.img_ocr_result != null) {
-                println("img url -> ${ocrResult.img}")
-                val path = ocrResult.img
-                val file = File(path)
-                val uri = Uri.fromFile(file)
-                val painter = rememberAsyncImagePainter(
-                    model = path,
-                    placeholder = painterResource(R.drawable.no_img),
-                    error = painterResource(R.drawable.no_img)
-                )
-                uri?.let{
-                    Image(
-                        painter = painter,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Fit
-                    )
-                }?:run{
-                    Box(modifier=Modifier.weight(1f),
-                        contentAlignment = Alignment.Center){
-                        Text("No Image", fontSize = 10.sp)
-                    }
-                }
-            }
-            else{
-                Box(modifier=Modifier.weight(1f),
-                    contentAlignment = Alignment.Center){
-                    Text("No Image", fontSize = 10.sp)
-                }
-            }
-            HorizontalDivider()
-            Text(
-                text = ocrResult.ocr_time,
-                modifier=Modifier.padding(top = 3.dp, bottom = 3.dp),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 8.sp
-                )
-            )
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

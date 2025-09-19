@@ -1,7 +1,9 @@
 package com.example.readtextfrombitmap.screens
 
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -51,20 +53,21 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import com.example.readtextfrombitmap.Utils.hasCamera
+import com.example.readtextfrombitmap.model.OcrResults
 import com.example.readtextfrombitmap.ui.theme.Camera_enhance
 import com.example.readtextfrombitmap.ui.theme.Gallery_thumbnail
 import com.example.readtextfrombitmap.viewmodel.OcrViewModel
 import java.io.File
 
 @Composable
-fun Screen(modifier: Modifier = Modifier, viewModel: OcrViewModel){
+fun OcrScreen(modifier: Modifier = Modifier, viewModel: OcrViewModel){
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var showImagePickerSheet by remember { mutableStateOf(false) }
     val cameraAvailable = hasCamera(context)
     var showLoadingDialog by remember { mutableStateOf(false) }
+
     val bitmapText = viewModel.text
-
-
     val photoUri = remember {
         FileProvider.getUriForFile(
             context,
@@ -100,38 +103,55 @@ fun Screen(modifier: Modifier = Modifier, viewModel: OcrViewModel){
         }
     }
 
+    // Content çağırılır
+    OcrContent(
+        bitmapText = bitmapText,
+        imageUri = imageUri,
+        imagePicker = {
+            showImagePickerSheet=true
+        },
+        modifier = modifier
+    )
+    // Bottom Sheet
+    if (showImagePickerSheet) {
+        ImagePickerSheet(
+            onDismiss = { showImagePickerSheet = false },
+            onGalleryClick = {
+                showImagePickerSheet = false
+                galleryLauncher.launch("image/*")
+            },
+            onCameraClick = {
+                if(cameraAvailable)
+                    cameraLauncher.launch(photoUri!!)
+                else {
+                    Toast.makeText(context,"The device has not camera", Toast.LENGTH_SHORT).show()
+                    showImagePickerSheet=false
+                }
+            }
+        )
+    }
+}
+@Composable
+fun OcrContent(
+    bitmapText: String="",
+    modifier: Modifier=Modifier,
+    imageUri: Uri?,
+    imagePicker:(()-> Unit)?=null
+    ){
     Column(
-        modifier = modifier.fillMaxSize().padding(5.dp)
+        modifier = modifier
+            .padding(5.dp)
     ) {
         var showImageDialog by remember { mutableStateOf(false) }
-        var showImagePickerSheet by remember { mutableStateOf(false) }
 
-        // Bottom Sheet
-        if (showImagePickerSheet) {
-            ImagePickerSheet(
-                onDismiss = { showImagePickerSheet = false },
-                onGalleryClick = {
-                    showImagePickerSheet = false
-                    galleryLauncher.launch("image/*")
-                },
-                onCameraClick = {
-                    if(cameraAvailable)
-                        cameraLauncher.launch(photoUri)
-                    else {
-                        Toast.makeText(context,"The device has not camera", Toast.LENGTH_SHORT).show()
-                        showImagePickerSheet=false
-                    }
-                }
-            )
-        }
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .clickable{
-                    if (imageUri == null) showImagePickerSheet=true
+                .clickable {
+                    if (imageUri == null)
+                        imagePicker?.invoke()
                     else showImageDialog = true
-
                 },
             shape = RoundedCornerShape(8.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary)
@@ -189,7 +209,8 @@ fun Screen(modifier: Modifier = Modifier, viewModel: OcrViewModel){
             color = MaterialTheme.colorScheme.surface // arka plan tema uyumlu
         ) {
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .verticalScroll(rememberScrollState()),
                 contentAlignment = Alignment.Center
             ) {

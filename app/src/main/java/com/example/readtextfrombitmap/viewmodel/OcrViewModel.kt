@@ -81,4 +81,9 @@ class OcrViewModel(application:Application): AndroidViewModel(application) {
         val ocr_result = OcrResults(img = file.path, img_ocr_result = text, ocr_time = Utils.getCurrentDateTime())
         dao.insert(ocr_result)
     }
+    fun deleteOcr(ocr:OcrResults){
+        viewModelScope.launch(Dispatchers.IO) {
+            dao.deleteResult(ocr)
+        }
+    }
 }
