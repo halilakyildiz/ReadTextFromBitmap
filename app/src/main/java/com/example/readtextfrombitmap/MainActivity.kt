@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -51,7 +52,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -60,6 +64,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -93,9 +98,11 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModelProvider
 import coil.compose.AsyncImage
 import com.example.readtextfrombitmap.model.OcrResults
@@ -128,9 +135,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(modifier: Modifier = Modifier,viewModel:OcrViewModel){
     val navItemList = listOf(
-        NavItem("History", History),
-        NavItem("New", Icons.Default.Add),
-        NavItem("Settings", Icons.Default.Settings)
+        NavItem(stringResource(R.string.history), History),
+        NavItem(stringResource(R.string.new_add), Icons.Default.Add),
+        NavItem(stringResource(R.string.settings), Icons.Default.Settings)
     )
 
     var selectedIndex by remember {
@@ -168,19 +175,57 @@ fun ContentScreen(modifier: Modifier = Modifier,selectedIndex:Int,viewModel:OcrV
 }
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier){
-    Box(modifier =modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center){
-        Text("Settings Screen")
+fun SettingsScreen(modifier: Modifier=Modifier){
+    Column(modifier = modifier.fillMaxSize()
+        .padding(5.dp)) {
+        OcrDropDown()
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OcrDropDown() {
+    val options = listOf(
+        stringResource(R.string.turkish),
+        stringResource(R.string.english))
+    var expanded by remember { mutableStateOf(false) }
+    var selectedText by remember { mutableStateOf(options[0]) }
 
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = selectedText,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.select_ocr_language)) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
 
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(item) },
+                    onClick = {
+                        selectedText = item
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     ReadTextFromBitmapTheme {
-
+        SettingsScreen()
     }
 }

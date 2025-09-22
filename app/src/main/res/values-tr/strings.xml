@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bottom Bar-->
+    <string name="history">Geçmiş</string>
+    <string name="new_add">Yeni</string>
+    <string name="settings">Ayarlar</string>
+
+    <!-- Bottom Sheet Dialog-->
+    <string name="from_gallery">Galeri</string>
+    <string name="from_camera">Kamera</string>
+
+    <!-- Main Screen-->
+    <string name="add_new">Yeni Ekle</string>
+    <string name="ocr_result_not_text">Sonuç yok</string>
+
+    <!-- Settings Screen-->
+    <string name="select_app_language">Uygulama Dili Seç</string>
+    <string name="select_ocr_language">Ocr Dili Seç</string>
+    <string name="select_theme">Tema seç</string>
+
+    <!-- Languages Dropdown Items-->
+    <string name="english">English</string>
+    <string name="turkish">Turkish</string>
+
+    <!-- Confirmation Dialog-->
+    <string name="confirmation_title">Uyarı</string>
+    <string name="confirmation_message">Bu OCR yi silmek istediğinize emin misiniz ?</string>
+    <string name="confirmation_yes">Evet</string>
+    <string name="confirmation_no">İptal</string>
+</resources>

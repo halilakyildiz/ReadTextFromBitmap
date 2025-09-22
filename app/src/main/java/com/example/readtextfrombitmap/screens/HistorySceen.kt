@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -77,7 +78,7 @@ fun HistoryScreen(modifier: Modifier = Modifier, viewModel: OcrViewModel){
 }
 @Composable
 fun MyQuestionDialog(
-    title:String="Warning",
+    title:String=stringResource(R.string.confirmation_title),
     message:String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
@@ -89,12 +90,12 @@ fun MyQuestionDialog(
         text = { Text(message) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Ok")
+                Text(stringResource(R.string.confirmation_yes))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.confirmation_no))
             }
         }
     )
@@ -172,7 +173,7 @@ fun OcrResultCard(
             }
             if(aletDialog){
                 MyQuestionDialog(
-                    message = "Are you sure delete this OCR ?",
+                    message = stringResource(R.string.confirmation_message),
                     onDismiss = {aletDialog=false},
                     onConfirm = {
                         viewModel.deleteOcr(ocrResult)

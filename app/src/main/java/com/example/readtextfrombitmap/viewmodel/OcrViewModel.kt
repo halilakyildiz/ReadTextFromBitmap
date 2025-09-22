@@ -50,7 +50,7 @@ class OcrViewModel(application:Application): AndroidViewModel(application) {
                 bitmap?.let{
                     text  = ocrManager.recognizeText(bitmap)
                 }
-                val file = saveUriPermanently(context,uri)
+                val file = saveUri(context,uri)
                 file?.let{
                     insertNewOcr(file)
                 }?:run{
@@ -65,7 +65,7 @@ class OcrViewModel(application:Application): AndroidViewModel(application) {
         }
     }
     // This method copy the file/img to a static location. So we can show it in history.
-    private fun saveUriPermanently(context: Context, uri: Uri): File? {
+    private fun saveUri(context: Context, uri: Uri): File? {
         return try {
             val inputStream = context.contentResolver.openInputStream(uri) ?: return null
             val dir = File(context.filesDir, "ocr_images") // kalıcı dizin

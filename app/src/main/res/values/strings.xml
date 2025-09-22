@@ -1,3 +1,32 @@
 <resources>
-    <string name="app_name">ReadTextFromBitmap</string>
+    <string name="app_name" translatable="false">Read Image</string>
+
+    <!-- Bottom Bar-->
+    <string name="history">History</string>
+    <string name="new_add">New</string>
+    <string name="settings">Settings</string>
+
+    <!-- Bottom Sheet Dialog-->
+    <string name="from_gallery">Gallery</string>
+    <string name="from_camera">Camera</string>
+
+    <!-- Main Screen-->
+    <string name="add_new">Add New</string>
+    <string name="ocr_result_not_text">No Text</string>
+
+    <!-- Settings Screen-->
+    <string name="select_app_language">Select App Language</string>
+    <string name="select_ocr_language">Select Ocr Language</string>
+    <string name="select_theme">Select Theme</string>
+
+    <!-- Languages Dropdown Items-->
+    <string name="english">English</string>
+    <string name="turkish">Turkish</string>
+
+    <!-- Confirmation Dialog-->
+    <string name="confirmation_title">Warning</string>
+    <string name="confirmation_message">Are you sure delete this OCR ?</string>
+    <string name="confirmation_yes">Yes</string>
+    <string name="confirmation_no">Cancel</string>
+
 </resources>

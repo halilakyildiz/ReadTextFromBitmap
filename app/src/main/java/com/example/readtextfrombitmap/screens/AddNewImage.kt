@@ -47,11 +47,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
+import com.example.readtextfrombitmap.R
 import com.example.readtextfrombitmap.Utils.hasCamera
 import com.example.readtextfrombitmap.model.OcrResults
 import com.example.readtextfrombitmap.ui.theme.Camera_enhance
@@ -170,10 +172,10 @@ fun OcrContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add New",
+                        contentDescription = stringResource(R.string.add_new),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text("Add New", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.add_new), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -232,7 +234,7 @@ fun OcrContent(
                 }
                 else{
                     Text(
-                        text = "No text",
+                        text = stringResource(R.string.ocr_result_not_text),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -270,12 +272,12 @@ fun ImagePickerSheet(
                 .fillMaxWidth()
         ) {
             ListItem(
-                headlineContent = { Text("Gallery") },
+                headlineContent = { Text(stringResource(R.string.from_gallery)) },
                 leadingContent = { Icon(Gallery_thumbnail, contentDescription = null) },
                 modifier = Modifier.clickable { onGalleryClick() }
             )
             ListItem(
-                headlineContent = { Text("Camera") },
+                headlineContent = { Text(stringResource(R.string.from_camera)) },
                 leadingContent = { Icon(Camera_enhance, contentDescription = null) },
                 modifier = Modifier.clickable { onCameraClick() }
             )
