@@ -19,24 +19,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.readtextfrombitmap.R
+import com.example.readtextfrombitmap.viewmodel.OcrViewModel
 
 @Composable
-fun SettingsScreen(modifier: Modifier=Modifier){
+fun SettingsScreen(modifier: Modifier=Modifier,viewModel: OcrViewModel){
     Column(modifier = modifier.fillMaxSize()
         .padding(5.dp)) {
-        OcrDropDown()
+        OcrDropDown(viewModel)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OcrDropDown() {
+fun OcrDropDown(viewModel: OcrViewModel) {
     val options = listOf(
         stringResource(R.string.turkish),
         stringResource(R.string.english)
     )
     var expanded by remember { mutableStateOf(false) }
     var selectedText by remember { mutableStateOf(options[0]) }
+    if(viewModel.getOcrTraniedData()=="tur")
+        selectedText=options[0]
+    else
+        selectedText=options[1]
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -62,6 +67,7 @@ fun OcrDropDown() {
                     text = { Text(item) },
                     onClick = {
                         selectedText = item
+                        viewModel.setOcrTraniedData(item)
                         expanded = false
                     }
                 )

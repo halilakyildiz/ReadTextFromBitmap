@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.readtextfrombitmap.R
 import com.example.readtextfrombitmap.Utils
 import com.example.readtextfrombitmap.ocr.OcrManager
 import com.example.readtextfrombitmap.Utils.uriToBitmap
@@ -57,6 +58,7 @@ class OcrViewModel(application:Application): AndroidViewModel(application) {
                 bitmap?.let{
                     withContext(Dispatchers.IO){
                         text  = ocrManager.recognizeText(bitmap)
+                        ocrManager.release()
                     }
                 }
                 // last 10 ocr are recorded
@@ -106,5 +108,20 @@ class OcrViewModel(application:Application): AndroidViewModel(application) {
             imageUri = uri
             processBitmap()
         }
+    }
+    fun setOcrTraniedData(selected:String){
+        when(selected){
+            context.getString(R.string.turkish)->{
+                ocrManager.getLangugagePref().setLanguage("tur")
+                ocrManager.initTess()
+            }
+            context.getString(R.string.english)->{
+                ocrManager.getLangugagePref().setLanguage("eng")
+                ocrManager.initTess()
+            }
+        }
+    }
+    fun getOcrTraniedData():String{
+        return ocrManager.getLangugagePref().getLanguage()
     }
 }

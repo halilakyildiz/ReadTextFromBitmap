@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             composable("ocr_screen") { OcrScreen(viewModel=viewModel, modifier = Modifier.padding(innerPadding)) }
                             composable("history_screen") { HistoryScreen(viewModel=viewModel, modifier = Modifier.padding(innerPadding)) }
-                            composable("settings_screen") { SettingsScreen(modifier = Modifier.padding(innerPadding)) }
+                            composable("settings_screen") { SettingsScreen(modifier = Modifier.padding(innerPadding),viewModel=viewModel) }
                         }
                     }
             }
@@ -90,6 +90,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     ReadTextFromBitmapTheme {
-        SettingsScreen()
+
     }
 }

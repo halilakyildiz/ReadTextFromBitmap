@@ -2,29 +2,54 @@ package com.example.readtextfrombitmap.ocr
 
 import android.content.Context
 import android.graphics.Bitmap
+import com.example.readtextfrombitmap.LanguagePrefManager
 import com.example.readtextfrombitmap.R
 import com.googlecode.tesseract.android.TessBaseAPI
 import java.io.File
 import java.io.FileOutputStream
 
 class OcrManager(private val context: Context) {
-    fun recognizeText(bitmap: Bitmap): String {
-        return try{
-            val tess = TessBaseAPI()
+    private var tess:TessBaseAPI
+    private val lang_pref:LanguagePrefManager by lazy{
+        LanguagePrefManager(context)
+    }
+    private var currentLang: String? = null
+    fun getLangugagePref():LanguagePrefManager=lang_pref
+
+    init {
+        tess = TessBaseAPI().apply {
             val dataPath = context.filesDir.absolutePath + "/tesseract/"
             val tessDataDir = File(dataPath, "tessdata")
-            println(dataPath)
-            // raw içindeki tur.traineddata dosyasını kopyala
-            copyAssetIfNeeded(context, R.raw.tur, tessDataDir, "tur.traineddata")
-            tess.init(dataPath, "tur")
-            //println("Bitmap boyutu: ${bitmap.width}x${bitmap.height}")
-            tess.setImage(bitmap)
-            val extractedText = tess.utF8Text
+            if (!tessDataDir.exists()) tessDataDir.mkdirs()
+
+            val lang = lang_pref.getLanguage()
+            val trainedDataRes = if (lang == "tur") R.raw.tur else R.raw.eng
+            copyAssetIfNeeded(context, trainedDataRes, tessDataDir, "$lang.traineddata")
+            init(dataPath, lang)
+        }
+        currentLang = lang_pref.getLanguage()
+    }
+
+    fun initTess(){
+        val lang = lang_pref.getLanguage()
+        if (lang != currentLang) {
             tess.end()
-            extractedText
-        }catch (e:Exception){
-            println(e.message)
-            e.message ?: "Hata !"
+            val dataPath = context.filesDir.absolutePath + "/tesseract/"
+            val tessDataDir = File(dataPath, "tessdata")
+            if (!tessDataDir.exists()) tessDataDir.mkdirs()
+
+            val trainedDataRes = if (lang == "tur") R.raw.tur else R.raw.eng
+            copyAssetIfNeeded(context, trainedDataRes, tessDataDir, "$lang.traineddata")
+            tess.init(dataPath, lang)
+            currentLang = lang
+        }
+    }
+    fun recognizeText(bitmap: Bitmap): String {
+        return try {
+            tess.setImage(bitmap)
+            tess.utF8Text
+        } finally {
+            tess.clear()
         }
     }
     private fun copyAssetIfNeeded(context: Context, resId: Int, outDir: File,outFileName:String) {
@@ -37,13 +62,13 @@ class OcrManager(private val context: Context) {
                         input.copyTo(output)
                     }
                 }
-                println("File copied successfully: ${outFile.absolutePath}")
             } catch (e: Exception) {
                 e.printStackTrace()
-                println("File could not be copied!")
+                println("Err: tur file could not be copied :${e.message}")
             }
-        } else {
-            println("File already exists: ${outFile.absolutePath}")
         }
+    }
+    fun release() {
+        tess.end() // free native source
     }
 }
