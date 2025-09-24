@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -34,6 +33,13 @@ class OcrViewModel(application:Application): AndroidViewModel(application) {
 
     var isLoading by mutableStateOf(true)
         private set
+
+    private val _isLoadingProcess = MutableStateFlow(false)
+    val isLoadingProcess: StateFlow<Boolean> = _isLoadingProcess
+
+    var imageUri by mutableStateOf<Uri?>(null)
+        private set
+
     val results: StateFlow<List<OcrResults>> = dao.getAllResults()
         .onStart { isLoading=true }
         .onEach { isLoading=false }
@@ -43,24 +49,27 @@ class OcrViewModel(application:Application): AndroidViewModel(application) {
     var text by mutableStateOf("")
         private set
 
-    suspend fun processBitmap(uri: Uri){
-        withContext(Dispatchers.IO){
+    private suspend fun processBitmap() {
+        imageUri?.let{
+            _isLoadingProcess.value = true
             try{
-                val bitmap = uriToBitmap(context, uri)
+                val bitmap = uriToBitmap(context, it)
                 bitmap?.let{
-                    text  = ocrManager.recognizeText(bitmap)
-                }
-                val file = saveUri(context,uri)
-                file?.let{
-                    insertNewOcr(file)
-                }?:run{
-                    withContext(Dispatchers.Main){
-                        Toast.makeText(context,"Img uri can not saved",Toast.LENGTH_LONG).show()
+                    withContext(Dispatchers.IO){
+                        text  = ocrManager.recognizeText(bitmap)
                     }
                 }
-
+                // last 10 ocr are recorded
+                if(results.value.size<10){
+                    val file = saveUri(context,it)
+                    file?.let{
+                        insertNewOcr(file)
+                    }
+                }
+                _isLoadingProcess.value = false
             }catch (e:Exception){
-                println("Err:View Model :"+e.message)
+                println("Err:View Model Processing :"+e.message)
+                _isLoadingProcess.value = false
             }
         }
     }
@@ -74,8 +83,13 @@ class OcrViewModel(application:Application): AndroidViewModel(application) {
             inputStream.use { input -> file.outputStream().use { output -> input.copyTo(output) } }
             file
         } catch (e: Exception) {
+            println("Err:View Model Save Uri :"+e.message)
             null
         }
+    }
+    private fun deleteOcrImage(filePath: String): Boolean {
+        val file = File(filePath)
+        return if (file.exists()) file.delete() else false
     }
     private suspend fun insertNewOcr(file: File){
         val ocr_result = OcrResults(img = file.path, img_ocr_result = text, ocr_time = Utils.getCurrentDateTime())
@@ -83,7 +97,14 @@ class OcrViewModel(application:Application): AndroidViewModel(application) {
     }
     fun deleteOcr(ocr:OcrResults){
         viewModelScope.launch(Dispatchers.IO) {
+            ocr.img?.let{deleteOcrImage(it)}
             dao.deleteResult(ocr)
+        }
+    }
+    fun upateImageUri(uri: Uri?) {
+        viewModelScope.launch {
+            imageUri = uri
+            processBitmap()
         }
     }
 }

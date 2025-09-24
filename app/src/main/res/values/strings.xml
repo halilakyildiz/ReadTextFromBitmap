@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Read Image</string>
+    <string name="app_name">Read Image</string>
 
     <!-- Bottom Bar-->
     <string name="history">History</string>
@@ -28,5 +28,10 @@
     <string name="confirmation_message">Are you sure delete this OCR ?</string>
     <string name="confirmation_yes">Yes</string>
     <string name="confirmation_no">Cancel</string>
+
+
+    <!-- History Screen-->
+    <string name="history_screen_info">Here are your 10 OCR results</string>
+    <string name="history_card_data_state">No record</string>
 
 </resources>

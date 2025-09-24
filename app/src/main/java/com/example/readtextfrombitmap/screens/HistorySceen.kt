@@ -3,6 +3,7 @@ package com.example.readtextfrombitmap.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,23 +58,29 @@ fun HistoryScreen(modifier: Modifier = Modifier, viewModel: OcrViewModel){
     if (loading) {
         LoadingAnimation()
     } else {
-        if(results.size>0)
-            LazyVerticalGrid(
-                modifier = modifier.fillMaxSize(),
-                columns = GridCells.Adaptive(minSize = 80.dp),
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ){
-                items(results) { ocr_result ->
-                    OcrResultCard(ocr_result,viewModel)
+        Column(modifier=modifier.fillMaxSize()){
+            Text(text = stringResource(R.string.history_screen_info),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(3.dp))
+            HorizontalDivider()
+            if(results.size>0)
+                LazyVerticalGrid(
+                    modifier = Modifier.weight(1f),
+                    columns = GridCells.Adaptive(minSize = 80.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ){
+                    items(results) { ocr_result ->
+                        OcrResultCard(ocr_result,viewModel)
+                    }
                 }
-            }
-        else
-            Box(modifier=modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center){
-                Text("No Data")
-            }
+            else
+                Box(modifier=Modifier.weight(1f).fillMaxWidth(),
+                    contentAlignment = Alignment.Center){
+                    Text(stringResource(R.string.history_card_data_state))
+                }
+        }
     }
 }
 @Composable
@@ -162,7 +169,10 @@ fun OcrResultCard(
                     Text(ocrResult.ocr_time,
                         style = MaterialTheme.typography.bodySmall)
                     Icon(imageVector = Icons.Filled.Delete, contentDescription = "Delete this ocr result",
-                        modifier = Modifier.clickable {
+                        modifier = Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = rememberRipple()
+                        ) {
                             //delete
                             aletDialog=true
                         },

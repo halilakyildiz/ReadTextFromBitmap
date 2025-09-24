@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Resim Oku</string>
+
     <!-- Bottom Bar-->
     <string name="history">Geçmiş</string>
     <string name="new_add">Yeni</string>
@@ -27,4 +29,8 @@
     <string name="confirmation_message">Bu OCR yi silmek istediğinize emin misiniz ?</string>
     <string name="confirmation_yes">Evet</string>
     <string name="confirmation_no">İptal</string>
+
+    <!-- History Screen-->
+    <string name="history_screen_info">İşte son 10 OCR çalışmanız</string>
+    <string name="history_card_data_state">Kayıt yok</string>
 </resources>
