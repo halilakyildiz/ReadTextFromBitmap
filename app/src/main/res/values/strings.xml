@@ -18,6 +18,11 @@
     <string name="select_app_language">Select App Language</string>
     <string name="select_ocr_language">Select Ocr Language</string>
     <string name="select_theme">Select Theme</string>
+    <string name="about_us">About Us</string>
+    <string name="about_us_developer_info">Developed by AkyıldızStudio®</string>
+    <string name="about_us_contact_us">Contac us</string>
+    <string name="about_us_contact_adress" translatable="false">akyildizstudio@gmail.com</string>
+    <string name="about_us_app_info">ReadImage is an OCR tool that extracts text from images and makes it editable using Tesseract models.</string>
 
     <!-- Languages Dropdown Items-->
     <string name="english">English</string>

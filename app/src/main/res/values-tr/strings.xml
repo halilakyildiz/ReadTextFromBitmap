@@ -19,6 +19,11 @@
     <string name="select_app_language">Uygulama Dili Seç</string>
     <string name="select_ocr_language">Ocr Dili Seç</string>
     <string name="select_theme">Tema seç</string>
+    <string name="about_us">Hakkımızda</string>
+    <string name="about_us_contact_us">Bize ulaşın</string>
+    <string name="about_us_app_info">ReadImage, Tesseract modelleri kullanılarak görsellerden metin çıkaran ve düzenlenebilir hale getiren bir OCR aracıdır.</string>
+    <string name="about_us_developer_info">AkyıldızStudio® tarafından geliştirilmiştir.</string>
+
 
     <!-- Languages Dropdown Items-->
     <string name="english">English</string>
